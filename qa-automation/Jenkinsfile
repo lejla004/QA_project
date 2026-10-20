@@ -1,0 +1,96 @@
+pipeline {
+    agent any
+
+    environment {
+        BASE_URL   = 'http://localhost:3000'
+        API_URL    = 'http://localhost:5000/api'
+        // Set these as Jenkins credentials/secret text in a real setup
+        // rather than committing real values.
+        ADMIN_EMAIL      = 'admin@bookstore.com'
+        ADMIN_PASSWORD   = 'Admin123!'
+        CUSTOMER_EMAIL   = 'customer@bookstore.com'
+        CUSTOMER_PASSWORD = 'Customer123!'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Install dependencies') {
+            steps {
+                dir('qa-automation') {
+                    sh 'npm ci'
+                    sh 'npx playwright install --with-deps chromium'
+                }
+            }
+        }
+
+        stage('Start application') {
+            steps {
+                // Assumes MySQL is already seeded and reachable in the CI
+                // environment. In a fuller setup this stage would also spin
+                // up the backend/frontend (e.g. via docker-compose) and
+                // wait for the health check before proceeding.
+                dir('bookstore/backend') {
+                    sh 'npm ci'
+                    sh 'nohup npm start > backend.log 2>&1 &'
+                }
+                dir('bookstore/frontend') {
+                    sh 'npm ci'
+                    sh 'nohup npm start > frontend.log 2>&1 &'
+                }
+                sh 'sleep 15' // give both servers time to boot
+            }
+        }
+
+        stage('Smoke tests') {
+            steps {
+                dir('qa-automation') {
+                    sh 'npm run test:smoke'
+                }
+            }
+        }
+
+        stage('API tests') {
+            steps {
+                dir('qa-automation') {
+                    sh 'npm run test:api'
+                }
+            }
+        }
+
+        stage('Regression tests') {
+            when {
+                // Run the full regression suite only on main or on demand,
+                // to keep feature-branch builds fast.
+                anyOf {
+                    branch 'main'
+                    triggeredBy 'UserIdCause'
+                }
+            }
+            steps {
+                dir('qa-automation') {
+                    sh 'npm run test:regression'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            dir('qa-automation') {
+                publishHTML(target: [
+                    reportDir: 'playwright-report',
+                    reportFiles: 'index.html',
+                    reportName: 'Playwright HTML Report',
+                    keepAll: true,
+                    alwaysLinkToLastBuild: true
+                ])
+                archiveArtifacts artifacts: 'playwright-report/**', allowEmptyArchive: true
+            }
+        }
+    }
+}

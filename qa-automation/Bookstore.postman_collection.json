@@ -1,0 +1,429 @@
+{
+  "info": {
+    "name": "Online Book Store API",
+    "description": "REST API collection for the Online Book Store QA practice project. Set the {{base_url}}, {{token}}, and {{admin_token}} collection variables after logging in.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:5000/api" },
+    { "key": "token", "value": "" },
+    { "key": "admin_token", "value": "" },
+    { "key": "book_id", "value": "1" },
+    { "key": "cart_item_id", "value": "1" },
+    { "key": "order_id", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health check",
+          "request": { "method": "GET", "url": "{{base_url}}/health" }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register (customer)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test.user@example.com\",\n  \"password\": \"Password123!\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Register - duplicate email (expect 409)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Duplicate\",\n  \"email\": \"customer@bookstore.com\",\n  \"password\": \"Password123!\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Register - missing fields (expect 400)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"nofields@example.com\"\n}" }
+          }
+        },
+        {
+          "name": "Login (customer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const data = pm.response.json();",
+                  "  pm.collectionVariables.set('token', data.data.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer@bookstore.com\",\n  \"password\": \"Customer123!\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const data = pm.response.json();",
+                  "  pm.collectionVariables.set('admin_token', data.data.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@bookstore.com\",\n  \"password\": \"Admin123!\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login - invalid credentials (expect 401)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer@bookstore.com\",\n  \"password\": \"WrongPassword\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/logout",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Books",
+      "item": [
+        { "name": "Get all books", "request": { "method": "GET", "url": "{{base_url}}/books" } },
+        { "name": "Search books by title", "request": { "method": "GET", "url": "{{base_url}}/books?search=fantasy" } },
+        { "name": "Filter books by category", "request": { "method": "GET", "url": "{{base_url}}/books?category=Fantasy" } },
+        { "name": "Sort books by price (asc)", "request": { "method": "GET", "url": "{{base_url}}/books?sort=price_asc" } },
+        { "name": "Get all categories", "request": { "method": "GET", "url": "{{base_url}}/books/categories" } },
+        { "name": "Get book by id", "request": { "method": "GET", "url": "{{base_url}}/books/{{book_id}}" } },
+        {
+          "name": "Get book by id - non-existing (expect 404)",
+          "request": { "method": "GET", "url": "{{base_url}}/books/999999" }
+        },
+        {
+          "name": "Get book by id - invalid id (expect 400)",
+          "request": { "method": "GET", "url": "{{base_url}}/books/abc" }
+        },
+        {
+          "name": "Create book (admin)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/books",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"New Test Book\",\n  \"author\": \"QA Author\",\n  \"price\": 9.99,\n  \"description\": \"Created via Postman\",\n  \"category_id\": 1,\n  \"stock\": 10\n}"
+            }
+          }
+        },
+        {
+          "name": "Create book - as customer (expect 403)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/books",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Should Fail\",\n  \"author\": \"X\",\n  \"price\": 5,\n  \"category_id\": 1,\n  \"stock\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Update book (admin)",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/books/{{book_id}}",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Title\",\n  \"author\": \"Updated Author\",\n  \"price\": 12.5,\n  \"description\": \"Updated via Postman\",\n  \"category_id\": 1,\n  \"stock\": 15\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete book (admin)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/books/{{book_id}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cart",
+      "item": [
+        {
+          "name": "Get cart",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/cart",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Add item to cart",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/cart/items",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"book_id\": {{book_id}},\n  \"quantity\": 1\n}" }
+          }
+        },
+        {
+          "name": "Add item - insufficient stock (expect 400)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/cart/items",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"book_id\": {{book_id}},\n  \"quantity\": 9999\n}" }
+          }
+        },
+        {
+          "name": "Add item - invalid quantity (expect 400)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/cart/items",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"book_id\": {{book_id}},\n  \"quantity\": -1\n}" }
+          }
+        },
+        {
+          "name": "Add item - no auth (expect 401)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/cart/items",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"book_id\": {{book_id}},\n  \"quantity\": 1\n}" }
+          }
+        },
+        {
+          "name": "Update cart item quantity",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/cart/items/{{cart_item_id}}",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"quantity\": 2\n}" }
+          }
+        },
+        {
+          "name": "Remove cart item",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/cart/items/{{cart_item_id}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Checkout (create order)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const data = pm.response.json();",
+                  "  pm.collectionVariables.set('order_id', data.data.orderId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/orders",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"Jane Customer\",\n  \"address\": \"123 Main St\",\n  \"city\": \"Sarajevo\",\n  \"postal_code\": \"71000\",\n  \"phone_number\": \"+387 61 000 000\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Checkout - empty cart (expect 400)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/orders",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"Jane Customer\",\n  \"address\": \"123 Main St\",\n  \"city\": \"Sarajevo\",\n  \"postal_code\": \"71000\",\n  \"phone_number\": \"+387 61 000 000\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Checkout - missing fields (expect 400)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/orders",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"full_name\": \"\"\n}" }
+          }
+        },
+        {
+          "name": "Get my orders",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/orders",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Get order by id",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/orders/{{order_id}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Get order by id - non-existing (expect 404)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/orders/999999",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Get order by id - invalid id (expect 400)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/orders/abc",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Get all orders (admin)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/orders",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }]
+          }
+        },
+        {
+          "name": "Get all orders - as customer (expect 403)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/orders",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Filter orders by status",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/orders?status=Pending",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }]
+          }
+        },
+        {
+          "name": "Update order status (admin)",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/admin/orders/{{order_id}}/status",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"Processing\"\n}" }
+          }
+        },
+        {
+          "name": "Update order status - invalid status (expect 400)",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/admin/orders/{{order_id}}/status",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"NotARealStatus\"\n}" }
+          }
+        }
+      ]
+    }
+  ]
+}

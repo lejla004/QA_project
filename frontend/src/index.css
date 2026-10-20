@@ -1,0 +1,245 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  background: #f7f7f8;
+  color: #1f2328;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+.page-narrow {
+  max-width: 480px;
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  background: #1f2328;
+  color: #fff;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.navbar-brand a {
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 1.1rem;
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.navbar-links a {
+  color: #d7d9dc;
+  text-decoration: none;
+}
+
+.navbar-links a:hover {
+  color: #fff;
+}
+
+.navbar-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #d7d9dc;
+}
+
+/* Buttons */
+button {
+  cursor: pointer;
+  background: #2f6f4f;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.link-button {
+  background: none;
+  color: #2f6f4f;
+  padding: 0;
+  text-decoration: underline;
+  font-size: 0.9rem;
+}
+
+/* Forms */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 420px;
+}
+
+.form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+  color: #444;
+}
+
+.form input,
+.form select,
+.form textarea {
+  padding: 8px;
+  border: 1px solid #c7c9cc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.form-error {
+  color: #b3261e;
+}
+
+.form-success {
+  color: #2f6f4f;
+}
+
+/* Filters */
+.filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filters input,
+.filters select {
+  padding: 8px;
+  border: 1px solid #c7c9cc;
+  border-radius: 4px;
+}
+
+/* Book grid */
+.book-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.book-card {
+  display: block;
+  background: #fff;
+  border: 1px solid #e2e2e4;
+  border-radius: 6px;
+  padding: 16px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.book-card h3 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+}
+
+.book-author {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0 0 4px;
+}
+
+.book-category {
+  display: inline-block;
+  background: #eef1ee;
+  color: #2f6f4f;
+  font-size: 0.8rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+.book-price {
+  font-weight: 600;
+  margin: 4px 0;
+}
+
+.in-stock {
+  color: #2f6f4f;
+  font-size: 0.85rem;
+}
+
+.out-of-stock {
+  color: #b3261e;
+  font-size: 0.85rem;
+}
+
+.add-to-cart {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.add-to-cart input {
+  width: 70px;
+  padding: 8px;
+}
+
+/* Tables */
+.cart-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+}
+
+.cart-table th,
+.cart-table td {
+  text-align: left;
+  padding: 10px;
+  border-bottom: 1px solid #e2e2e4;
+}
+
+.cart-table input[type="number"] {
+  width: 60px;
+  padding: 6px;
+}
+
+.cart-total {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* Admin tabs */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.tab {
+  background: #e2e2e4;
+  color: #333;
+}
+
+.tab.active {
+  background: #2f6f4f;
+  color: #fff;
+}

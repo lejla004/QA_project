@@ -1,0 +1,18 @@
+{
+  "name": "bookstore-qa-automation",
+  "version": "1.0.0",
+  "description": "Playwright UI (POM) and Axios API test automation for the Online Book Store QA practice project",
+  "scripts": {
+    "test": "playwright test",
+    "test:smoke": "playwright test tests/ui/smoke",
+    "test:regression": "playwright test tests/ui/regression",
+    "test:api": "playwright test tests/api",
+    "test:all": "playwright test tests",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.47.0",
+    "axios": "^1.7.2",
+    "dotenv": "^16.4.5"
+  }
+}
